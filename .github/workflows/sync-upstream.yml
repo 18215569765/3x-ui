@@ -142,10 +142,16 @@ jobs:
             fi
 
             encoded_name="$(jq -rn --arg value "$asset_name" '$value | @uri')"
-            gh api --hostname uploads.github.com --method POST \
+            curl --fail-with-body --retry 5 --retry-all-errors \
+              --retry-delay 5 --retry-max-time 300 \
+              --request POST \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
               -H "Content-Type: $content_type" \
-              "repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?name=${encoded_name}" \
-              --input "$asset_path" >/dev/null
+              --data-binary "@$asset_path" \
+              "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?name=${encoded_name}" \
+              >/dev/null
 
             rm -f "$asset_path"
           done
