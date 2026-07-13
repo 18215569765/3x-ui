@@ -86,10 +86,14 @@ jobs:
           jq '{tag_name, name, body, draft, prerelease, make_latest: "true"}' \
             "$upstream_release" > "$release_payload"
 
-          release_id="$(
+          if existing_release="$(
             gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag_name}" \
-              --jq '.id' 2>/dev/null || true
-          )"
+              2>/dev/null
+          )"; then
+            release_id="$(jq -r '.id' <<< "$existing_release")"
+          else
+            release_id=""
+          fi
 
           if [[ -z "$release_id" ]]; then
             release_id="$(
