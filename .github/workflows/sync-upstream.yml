@@ -6,7 +6,7 @@ on:
     - cron: "0 19 * * *"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: sync-upstream
@@ -29,22 +29,28 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.SYNC_TOKEN }}
 
-      - name: Configure git
+      - name: Sync code and keep only this workflow
+        shell: bash
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Fetch upstream
-        run: |
+          cp .github/workflows/sync-upstream.yml "$RUNNER_TEMP/sync-upstream.yml"
+
           git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
           git fetch upstream "${UPSTREAM_BRANCH}" --tags
+          git read-tree --reset -u "upstream/${UPSTREAM_BRANCH}"
 
-      - name: Fast-forward branch
-        run: |
-          git checkout "${TARGET_BRANCH}"
-          git merge --ff-only "upstream/${UPSTREAM_BRANCH}"
+          mkdir -p .github/workflows
+          find .github/workflows -maxdepth 1 -type f -delete
+          cp "$RUNNER_TEMP/sync-upstream.yml" .github/workflows/sync-upstream.yml
 
-      - name: Push branch and tags
-        run: |
-          git push origin "${TARGET_BRANCH}"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: sync upstream"
+            git push origin "HEAD:${TARGET_BRANCH}"
+          fi
+
           git push origin --tags
