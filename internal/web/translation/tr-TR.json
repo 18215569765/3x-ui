@@ -261,19 +261,18 @@
       "backup": "Yedek",
       "backupTitle": "Yedekleme ve Geri Yükleme",
       "exportDatabase": "Yedekle",
-      "exportDatabaseDesc": "Mevcut veritabanınızın yedeğini içeren bir .db dosyasını cihazınıza indirmek için tıklayın.",
+      "exportDatabaseDesc": "Mevcut veritabanınızın yedeğini içeren bir .db dosyasını cihazınıza indirmek için tıklayın. Aynı dosya PostgreSQL üzerinde çalışan bir panele de geri yüklenebilir.",
       "importDatabase": "Geri Yükle",
-      "importDatabaseDesc": "Cihazınızdan bir .db dosyası seçip yükleyerek veritabanınızı yedekten geri yüklemek için tıklayın.",
+      "importDatabaseDesc": "Cihazınızdan bir .db yedeği veya taşıma dökümü (.dump) seçip yükleyerek veritabanınızı geri yüklemek için tıklayın.",
       "importDatabaseSuccess": "Veritabanı başarıyla içe aktarıldı.",
       "importDatabaseError": "Veritabanı içe aktarılırken bir hata oluştu.",
       "readDatabaseError": "Veritabanı okunurken bir hata oluştu.",
       "getDatabaseError": "Veritabanı alınırken bir hata oluştu.",
       "getConfigError": "Yapılandırma dosyası alınırken bir hata oluştu.",
-      "backupPostgresNote": "Bu panel PostgreSQL üzerinde çalışıyor. 'Yedekle' bir pg_dump arşivi (.dump) indirir, 'Geri Yükle' ise onu pg_restore ile geri yükler. Sunucuda PostgreSQL istemci araçlarının (pg_dump ve pg_restore) kurulu olması gerekir.",
+      "backupPostgresNote": "Bu panel PostgreSQL üzerinde çalışıyor. 'Yedekle' bir pg_dump arşivi (.dump) indirir, 'Geri Yükle' ise onu pg_restore ile geri yükler. 'Geri Yükle' ayrıca bir SQLite veritabanını (.db) veya SQLite taşıma dökümünü kabul eder ve verilerini PostgreSQL'e aktarır. Sunucuda PostgreSQL istemci araçlarının (pg_dump ve pg_restore) kurulu olması gerekir.",
       "exportDatabasePgDesc": "Mevcut veritabanınızın PostgreSQL dökümünü (.dump) cihazınıza indirmek için tıklayın.",
-      "importDatabasePgDesc": "PostgreSQL veritabanınızı geri yüklemek için bir .dump dosyası seçip yüklemek üzere tıklayın. Bu, tüm mevcut verilerin yerini alır.",
+      "importDatabasePgDesc": "Veritabanınızı geri yüklemek için bir PostgreSQL yedeği (.dump), SQLite veritabanı (.db) veya SQLite taşıma dökümü seçip yüklemek üzere tıklayın. Bu, tüm mevcut verilerin yerini alır.",
       "migrationDownload": "Geçiş Dosyasını İndir",
-      "migrationDownloadDesc": "SQLite veritabanınızın taşınabilir .dump (SQL metni) yedeğini indirmek için tıklayın.",
       "migrationDownloadPgDesc": "PostgreSQL verilerinizden oluşturulan ve bu paneli SQLite üzerinde çalıştırmaya hazır bir .db SQLite veritabanı indirmek için tıklayın."
     },
     "inbounds": {
@@ -775,7 +774,7 @@
       "renew": "Otomatik Yenileme",
       "renewDesc": "Süre dolduktan sonra otomatik yeniler. (0 = devre dışı) (birim: gün)",
       "renewDays": "Otomatik Yenileme (gün)",
-      "searchPlaceholder": "E-posta, yorum, sub ID, UUID, parola, auth ara…",
+      "searchPlaceholder": "E-posta, yorum, sub ID, UUID, parola, auth, Telegram ID ara…",
       "filterTitle": "Kullanıcıları Filtrele",
       "clearAllFilters": "Tümünü Temizle",
       "filters": {
@@ -1622,6 +1621,8 @@
         "tag": "Etiket",
         "tagDesc": "Benzersiz Etiket",
         "address": "Adres",
+        "egress": "Egress",
+        "egressHint": "Run an HTTP test to show egress IP and country.",
         "reverse": "Ters",
         "domain": "Alan Adı",
         "type": "Tür",
@@ -1755,6 +1756,7 @@
         "tagPlaceholder": "benzersiz dengeleyici etiketi",
         "selector": "Seçici",
         "fallback": "Fallback",
+        "cycleTooltip": "Döngü: {path} → ({start} adresine geri dön)",
         "expected": "Beklenen",
         "expectedPlaceholder": "optimal düğüm sayısı",
         "maxRtt": "Maks. RTT",
@@ -1764,7 +1766,12 @@
         "balancerDesc": "Dengeleyici Etiketi (balancerTag) ve Giden Bağlantı Etiketi (outboundTag) aynı anda kullanılamaz. Aynı anda kullanıldığında yalnızca giden bağlantı etiketi geçerli olur.",
         "costMatch": "Etiket deseni",
         "costValue": "Ağırlık",
-        "costRegexp": "Düzenli ifade eşleşmesi"
+        "costRegexp": "Düzenli ifade eşleşmesi",
+        "balancerDeleteInUse": "Bu dengeleyici silinemez — şu dengeleyicilerin yedeği olarak kullanılmaktadır: {names}",
+        "balancerFallbackCycle": "Bu dengeleyiciyi yedek olarak ayarlayamazsınız — döngüsel bağımlılık oluşturur.",
+        "balancerFallbackInfo": "Trafik şu yoldan yönlendirilecektir: Dengeleyici → Loopback → Sunucu → Hedef dengeleyici → Bağlantı çıkışı. Bu, sunucu üzerinden ek bir atlama ekler ve hafif gecikmelere neden olabilir.",
+        "fallbackBalancerHint": "Yedek olarak başka bir dengeleyici seçin",
+        "reservedPrefix": " _bl_ ön eki dahili dengeleyici loopback nesneleri için ayrılmıştır"
       },
       "wireguard": {
         "secretKey": "Gizli Anahtar",
@@ -1858,14 +1865,17 @@
         "dnsPresetFamily": "Aile",
         "clearAll": "Tümünü Sil",
         "clearAllTitle": "Tüm DNS sunucularını sil?",
-        "clearAllConfirm": "Bu işlem tüm DNS sunucularını listeden kaldırır. Geri alınamaz."
+        "clearAllConfirm": "Bu işlem tüm DNS sunucularını listeden kaldırır. Geri alınamaz.",
+        "dnsLeakWarning": "DNS; localhost, düz UDP/TCP, yerel mod DoH/DoQ, fallback sorguları veya EDNS client IP üzerinden sızabilir. Gizlilik önemliyse yönlendirilmiş DoH, hosts sabitlemeleri ve kapalı fallback kullanın."
       },
       "fakedns": {
         "add": "Sahte DNS Ekle",
         "edit": "Sahte DNS'i Düzenle",
         "ipPool": "IP Havuzu Alt Ağı",
         "poolSize": "Havuz Boyutu"
-      }
+      },
+      "defaultOutbound": "Varsayılan giden",
+      "defaultOutboundDesc": "Yönlendirme kuralıyla eşleşmeyen trafik bu gideni kullanır (listedeki ilk giden)."
     },
     "hosts": {
       "addHost": "Host Ekle",
@@ -1894,7 +1904,7 @@
       "fields": {
         "remark": "Açıklama",
         "serverDescription": "Tanım",
-        "inbound": "Gelen Bağlantı",
+        "inbound": "Gelen Bağlantılar",
         "address": "Adres",
         "port": "Port",
         "endpoint": "Uç Nokta",
@@ -1921,7 +1931,8 @@
         "tags": "Etiketler",
         "nodeGuids": "Düğümler",
         "excludeFromSubTypes": "Formatlardan hariç tut",
-        "verifyPeerCertByName": "Peer sertifikasını ada göre doğrula"
+        "verifyPeerCertByName": "Peer sertifikasını ada göre doğrula",
+        "inheritAddress": "Adresi devralır"
       },
       "hints": {
         "address": "Gelen bağlantının kendi adresini devralmak için boş bırakın.",

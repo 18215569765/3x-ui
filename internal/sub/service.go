@@ -714,7 +714,7 @@ func (s *SubService) genVmessLink(inbound *model.Inbound, email string) string {
 		return ""
 	}
 	obj["id"] = client.ID
-	obj["scy"] = client.Security
+	obj["scy"] = normalizeVmessSecurity(client.Security)
 
 	externalProxies, _ := stream["externalProxy"].([]any)
 
@@ -724,6 +724,18 @@ func (s *SubService) genVmessLink(inbound *model.Inbound, email string) string {
 
 	obj["ps"] = s.genRemark(inbound, email, "", network)
 	return buildVmessLink(obj)
+}
+
+// normalizeVmessSecurity maps the vmess security values xray-core v26.7.11
+// removed ("none"/"zero"), plus the legacy empty string, to "auto" so links
+// and subscriptions stop advertising values the upgraded server rejects on
+// the wire.
+func normalizeVmessSecurity(security string) string {
+	switch security {
+	case "", "none", "zero":
+		return "auto"
+	}
+	return security
 }
 
 // vlessEncryptionEnabled reports whether the VLESS inbound settings enable
@@ -1556,17 +1568,18 @@ func applyExternalProxyTLSParams(ep map[string]any, params map[string]string, se
 // the inbound's own — Hysteria external proxies are typically alternate
 // endpoints (port-hop / CDN) fronting the same certificate.
 func applyExternalProxyHysteriaParams(ep map[string]any, params map[string]string) {
-	pins, ok := externalProxyPins(ep["pinnedPeerCertSha256"])
-	if !ok {
-		return
-	}
-	hexPins := make([]string, 0, len(pins))
-	for _, p := range pins {
-		if s, ok := p.(string); ok {
-			hexPins = append(hexPins, hysteriaPinHex(s))
+	if pins, ok := externalProxyPins(ep["pinnedPeerCertSha256"]); ok {
+		hexPins := make([]string, 0, len(pins))
+		for _, p := range pins {
+			if s, ok := p.(string); ok {
+				hexPins = append(hexPins, hysteriaPinHex(s))
+			}
 		}
+		params["pinSHA256"] = strings.Join(hexPins, ",")
 	}
-	params["pinSHA256"] = strings.Join(hexPins, ",")
+	if ai, ok := ep["allowInsecure"].(bool); ok && ai {
+		params["insecure"] = "1"
+	}
 }
 
 // cloneStreamForExternalProxy returns a shallow clone of stream with
@@ -2130,6 +2143,7 @@ var validFinalMaskTCPTypes = map[string]struct{}{
 	"header-custom": {},
 	"fragment":      {},
 	"sudoku":        {},
+	"xmc":           {},
 }
 
 // applyKcpShareParams reconstructs legacy KCP share-link fields from either

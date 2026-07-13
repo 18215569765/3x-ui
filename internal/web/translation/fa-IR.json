@@ -261,19 +261,18 @@
       "backup": "پشتیبان‌گیری",
       "backupTitle": "پشتیبان‌گیری و بازیابی",
       "exportDatabase": "پشتیبان‌گیری",
-      "exportDatabaseDesc": "برای دانلود یک فایل .db حاوی پشتیبان از پایگاه داده فعلی خود به دستگاهتان کلیک کنید.",
+      "exportDatabaseDesc": "برای دانلود یک فایل .db حاوی پشتیبان از پایگاه داده فعلی خود به دستگاهتان کلیک کنید. همین فایل در پنلی که روی PostgreSQL اجرا می‌شود نیز قابل بازیابی است.",
       "importDatabase": "بازیابی",
-      "importDatabaseDesc": "برای انتخاب و آپلود یک فایل .db از دستگاهتان و بازیابی پایگاه داده از یک پشتیبان کلیک کنید.",
+      "importDatabaseDesc": "برای انتخاب و آپلود یک پشتیبان .db یا فایل مهاجرت ‎.dump از دستگاهتان جهت بازیابی پایگاه داده کلیک کنید.",
       "importDatabaseSuccess": "پایگاه داده با موفقیت وارد شد",
       "importDatabaseError": "خطا در وارد کردن پایگاه داده",
       "readDatabaseError": "خطا در خواندن پایگاه داده",
       "getDatabaseError": "خطا در دریافت پایگاه داده",
       "getConfigError": "خطا در دریافت فایل پیکربندی",
-      "backupPostgresNote": "این پنل روی PostgreSQL اجرا می‌شود. «پشتیبان‌گیری» یک آرشیو pg_dump (.dump) دانلود می‌کند و «بازیابی» آن را با pg_restore بازمی‌گرداند. سرور باید ابزارهای کلاینت PostgreSQL (pg_dump و pg_restore) را نصب داشته باشد.",
+      "backupPostgresNote": "این پنل روی PostgreSQL اجرا می‌شود. «پشتیبان‌گیری» یک آرشیو pg_dump (.dump) دانلود می‌کند و «بازیابی» آن را با pg_restore بازمی‌گرداند. «بازیابی» همچنین پایگاه‌دادهٔ SQLite (.db) یا فایل مهاجرت SQLite را می‌پذیرد و داده‌های آن را به PostgreSQL وارد می‌کند. سرور باید ابزارهای کلاینت PostgreSQL (pg_dump و pg_restore) را نصب داشته باشد.",
       "exportDatabasePgDesc": "برای دانلود یک دامپ PostgreSQL (.dump) از پایگاه داده فعلی روی دستگاهتان کلیک کنید.",
-      "importDatabasePgDesc": "برای انتخاب و بارگذاری یک فایل .dump جهت بازیابی پایگاه داده PostgreSQL کلیک کنید. این کار همه داده‌های فعلی را جایگزین می‌کند.",
+      "importDatabasePgDesc": "برای انتخاب و بارگذاری یک پشتیبان PostgreSQL (.dump)، پایگاه‌دادهٔ SQLite (.db) یا فایل مهاجرت SQLite جهت بازیابی پایگاه داده کلیک کنید. این کار همه داده‌های فعلی را جایگزین می‌کند.",
       "migrationDownload": "دانلود فایل مهاجرت",
-      "migrationDownloadDesc": "برای دانلود یک خروجی قابل‌حمل ‎.dump (متن SQL) از پایگاه‌دادهٔ SQLite خود کلیک کنید.",
       "migrationDownloadPgDesc": "برای دانلود یک پایگاه‌دادهٔ SQLite با پسوند ‎.db که از داده‌های PostgreSQL شما ساخته می‌شود کلیک کنید؛ آمادهٔ اجرای این پنل روی SQLite."
     },
     "inbounds": {
@@ -775,7 +774,7 @@
       "renew": "تمدید خودکار",
       "renewDesc": "تمدید خودکار پس از انقضا. (۰ = غیرفعال) (واحد: روز)",
       "renewDays": "تمدید خودکار (روز)",
-      "searchPlaceholder": "جستجوی ایمیل، توضیح، Sub ID، UUID، رمز، احراز...",
+      "searchPlaceholder": "جستجوی ایمیل، توضیح، Sub ID، UUID، رمز، احراز، Telegram ID...",
       "filterTitle": "فیلتر کاربران",
       "clearAllFilters": "پاک کردن همه",
       "filters": {
@@ -1622,6 +1621,8 @@
         "tag": "تگ",
         "tagDesc": "برچسب یگانه",
         "address": "آدرس",
+        "egress": "Egress",
+        "egressHint": "Run an HTTP test to show egress IP and country.",
         "reverse": "معکوس",
         "domain": "دامنه",
         "type": "نوع",
@@ -1755,6 +1756,7 @@
         "tagPlaceholder": "تگ منحصربه‌فرد بالانسر",
         "selector": "انتخابگر",
         "fallback": "Fallback",
+        "cycleTooltip": "حلقه: {path} → (بازگشت به {start})",
         "expected": "مورد انتظار",
         "expectedPlaceholder": "تعداد نود بهینه",
         "maxRtt": "حداکثر RTT",
@@ -1764,7 +1766,12 @@
         "balancerDesc": "امکان استفاده همزمان balancerTag و outboundTag باهم وجود ندارد. درصورت استفاده همزمان فقط outboundTag عمل خواهد کرد.",
         "costMatch": "الگوی برچسب",
         "costValue": "وزن",
-        "costRegexp": "تطبیق با عبارت باقاعده"
+        "costRegexp": "تطبیق با عبارت باقاعده",
+        "balancerDeleteInUse": "امکان حذف این بالانسر وجود ندارد — به عنوان پشتیبان برای موارد زیر استفاده می‌شود: {names}",
+        "balancerFallbackCycle": "امکان تنظیم این بالانسر به عنوان پشتیبان وجود ندارد — وابستگی دایره‌ای ایجاد می‌کند.",
+        "balancerFallbackInfo": "ترافیک از مسیر زیر مسیریابی می‌شود: بالانسر → Loopback → سرور → بالانسر مقصد → اتصال خروجی. این یک پرش اضافی از طریق سرور اضافه می‌کند که ممکن است تأخیرهای جزئی ایجاد کند.",
+        "fallbackBalancerHint": "یک بالانسر دیگر به عنوان پشتیبان انتخاب کنید",
+        "reservedPrefix": "پیشوند _bl_ برای اشیاء loopback داخلی بالانسر رزرو شده است"
       },
       "wireguard": {
         "secretKey": "کلید شخصی",
@@ -1858,14 +1865,17 @@
         "dnsPresetFamily": "خانوادگی",
         "clearAll": "حذف همه",
         "clearAllTitle": "حذف همه سرورهای DNS؟",
-        "clearAllConfirm": "این کار همه سرورهای DNS را از لیست حذف می‌کند و قابل بازگشت نیست."
+        "clearAllConfirm": "این کار همه سرورهای DNS را از لیست حذف می‌کند و قابل بازگشت نیست.",
+        "dnsLeakWarning": "DNS ممکن است از طریق localhost، UDP/TCP ساده، حالت محلی DoH/DoQ، درخواست‌های fallback یا EDNS client IP نشت کند. برای حریم خصوصی از DoH مسیریابی‌شده، مقدارهای hosts ثابت و غیرفعال‌سازی fallback استفاده کنید."
       },
       "fakedns": {
         "add": "افزودن دی‌ان‌اس جعلی",
         "edit": "ویرایش دی‌ان‌اس جعلی",
         "ipPool": "زیرشبکه استخر آی‌پی",
         "poolSize": "اندازه استخر"
-      }
+      },
+      "defaultOutbound": "خروجی پیش‌فرض",
+      "defaultOutboundDesc": "ترافیکی که با هیچ قانون مسیریابی جور نشود از این خروجی استفاده می‌کند (اولین خروجی در فهرست)."
     },
     "hosts": {
       "addHost": "افزودن میزبان",
@@ -1894,7 +1904,7 @@
       "fields": {
         "remark": "نام",
         "serverDescription": "توضیحات",
-        "inbound": "اینباند",
+        "inbound": "اینباندها",
         "address": "آدرس",
         "port": "پورت",
         "endpoint": "نقطه پایانی",
@@ -1921,7 +1931,8 @@
         "shuffleHost": "درهم‌سازی میزبان",
         "tags": "برچسب‌ها",
         "nodeGuids": "نودها",
-        "excludeFromSubTypes": "حذف از فرمت‌ها"
+        "excludeFromSubTypes": "حذف از فرمت‌ها",
+        "inheritAddress": "ارث‌بری آدرس"
       },
       "hints": {
         "address": "برای ارث‌بری آدرس خودِ اینباند خالی بگذارید.",

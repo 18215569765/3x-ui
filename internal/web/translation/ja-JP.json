@@ -261,19 +261,18 @@
       "backup": "バックアップ",
       "backupTitle": "バックアップと復元",
       "exportDatabase": "バックアップ",
-      "exportDatabaseDesc": "クリックして、現在のデータベースのバックアップを含む .db ファイルをデバイスにダウンロードします。",
+      "exportDatabaseDesc": "クリックして、現在のデータベースのバックアップを含む .db ファイルをデバイスにダウンロードします。同じファイルは PostgreSQL で動作するパネルにも復元できます。",
       "importDatabase": "復元",
-      "importDatabaseDesc": "クリックして、デバイスから .db ファイルを選択し、アップロードしてバックアップからデータベースを復元します。",
+      "importDatabaseDesc": "クリックして、デバイスから .db バックアップまたは移行ダンプ (.dump) を選択し、アップロードしてデータベースを復元します。",
       "importDatabaseSuccess": "データベースのインポートに成功しました",
       "importDatabaseError": "データベースのインポート中にエラーが発生しました",
       "readDatabaseError": "データベースの読み取り中にエラーが発生しました",
       "getDatabaseError": "データベースの取得中にエラーが発生しました",
       "getConfigError": "設定ファイルの取得中にエラーが発生しました",
-      "backupPostgresNote": "このパネルは PostgreSQL で動作しています。「バックアップ」は pg_dump アーカイブ (.dump) をダウンロードし、「復元」は pg_restore で読み込み直します。サーバーに PostgreSQL クライアントツール (pg_dump と pg_restore) がインストールされている必要があります。",
+      "backupPostgresNote": "このパネルは PostgreSQL で動作しています。「バックアップ」は pg_dump アーカイブ (.dump) をダウンロードし、「復元」は pg_restore で読み込み直します。「復元」は SQLite データベース (.db) や SQLite 移行ダンプも受け付け、そのデータを PostgreSQL に取り込みます。サーバーに PostgreSQL クライアントツール (pg_dump と pg_restore) がインストールされている必要があります。",
       "exportDatabasePgDesc": "現在のデータベースの PostgreSQL ダンプ (.dump) を端末にダウンロードするにはクリックしてください。",
-      "importDatabasePgDesc": "PostgreSQL データベースを復元するために .dump ファイルを選択してアップロードするにはクリックしてください。現在のすべてのデータが置き換えられます。",
+      "importDatabasePgDesc": "データベースを復元するために PostgreSQL バックアップ (.dump)、SQLite データベース (.db)、または SQLite 移行ダンプを選択してアップロードするにはクリックしてください。現在のすべてのデータが置き換えられます。",
       "migrationDownload": "移行ファイルをダウンロード",
-      "migrationDownloadDesc": "SQLite データベースのポータブルな .dump（SQL テキスト）エクスポートをダウンロードするにはクリックします。",
       "migrationDownloadPgDesc": "PostgreSQL のデータから作成した .db SQLite データベースをダウンロードします。このパネルを SQLite で実行する準備が整います。"
     },
     "inbounds": {
@@ -775,7 +774,7 @@
       "renew": "自動更新",
       "renewDesc": "有効期限切れ後に自動更新します。(0 = 無効) (単位: 日)",
       "renewDays": "自動更新 (日)",
-      "searchPlaceholder": "メール、コメント、sub ID、UUID、パスワード、auth を検索…",
+      "searchPlaceholder": "メール、コメント、sub ID、UUID、パスワード、auth、Telegram ID を検索…",
       "filterTitle": "クライアントをフィルタ",
       "clearAllFilters": "すべてクリア",
       "filters": {
@@ -1622,6 +1621,8 @@
         "tag": "タグ",
         "tagDesc": "一意のタグ",
         "address": "アドレス",
+        "egress": "Egress",
+        "egressHint": "Run an HTTP test to show egress IP and country.",
         "reverse": "リバース",
         "domain": "ドメイン",
         "type": "タイプ",
@@ -1755,6 +1756,7 @@
         "tagPlaceholder": "一意のバランサータグ",
         "selector": "セレクター",
         "fallback": "Fallback",
+        "cycleTooltip": "循環: {path} → ({start} に戻る)",
         "expected": "期待値",
         "expectedPlaceholder": "最適ノード数",
         "maxRtt": "最大 RTT",
@@ -1764,7 +1766,12 @@
         "balancerDesc": "balancerTagとoutboundTagは同時に使用できません。同時に使用された場合、outboundTagのみが有効になります。",
         "costMatch": "タグパターン",
         "costValue": "重み",
-        "costRegexp": "正規表現で一致"
+        "costRegexp": "正規表現で一致",
+        "balancerDeleteInUse": "このバランサーを削除できません — 以下のバランサーのフォールバックとして使用されています：{names}",
+        "balancerFallbackCycle": "このバランサーをフォールバックに設定できません — 循環依存が発生します。",
+        "balancerFallbackInfo": "トラフィックは以下のルートで転送されます：バランサー → Loopback → サーバー → ターゲットバランサー → アウトバウンド。これによりサーバーを経由する追加ホップが発生し、多少の遅延が生じる場合があります。",
+        "fallbackBalancerHint": "フォールバックとして別のバランサーを選択してください",
+        "reservedPrefix": "プレフィックス _bl_ はバランサーの内部ループバックオブジェクト用に予約されています"
       },
       "wireguard": {
         "secretKey": "シークレットキー",
@@ -1858,14 +1865,17 @@
         "dnsPresetFamily": "ファミリー",
         "clearAll": "すべて削除",
         "clearAllTitle": "すべての DNS サーバを削除しますか？",
-        "clearAllConfirm": "リストからすべての DNS サーバが削除されます。この操作は元に戻せません。"
+        "clearAllConfirm": "リストからすべての DNS サーバが削除されます。この操作は元に戻せません。",
+        "dnsLeakWarning": "DNS は localhost、暗号化なしの UDP/TCP、ローカルモードの DoH/DoQ、フォールバック問い合わせ、EDNS client IP から漏れる可能性があります。プライバシー重視ではルーティングされた DoH、hosts 固定、フォールバック無効化を使ってください。"
       },
       "fakedns": {
         "add": "フェイクDNS追加",
         "edit": "フェイクDNS編集",
         "ipPool": "IPプールサブネット",
         "poolSize": "プールサイズ"
-      }
+      },
+      "defaultOutbound": "デフォルトアウトバウンド",
+      "defaultOutboundDesc": "ルーティング規則に一致しないトラフィックはこのアウトバウンドを使います（一覧の先頭）。"
     },
     "hosts": {
       "addHost": "ホストを追加",
@@ -1921,7 +1931,8 @@
         "shuffleHost": "ホストをシャッフル",
         "tags": "タグ",
         "nodeGuids": "ノード",
-        "excludeFromSubTypes": "形式から除外"
+        "excludeFromSubTypes": "形式から除外",
+        "inheritAddress": "アドレス継承"
       },
       "hints": {
         "address": "空欄にするとインバウンド自身のアドレスを継承します。",

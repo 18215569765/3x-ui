@@ -261,19 +261,18 @@
       "backup": "Backup",
       "backupTitle": "Backup & Restauração",
       "exportDatabase": "Backup",
-      "exportDatabaseDesc": "Clique para baixar um arquivo .db contendo um backup do seu banco de dados atual para o seu dispositivo.",
+      "exportDatabaseDesc": "Clique para baixar um arquivo .db contendo um backup do seu banco de dados atual para o seu dispositivo. O mesmo arquivo também pode ser restaurado em um painel executando PostgreSQL.",
       "importDatabase": "Restaurar",
-      "importDatabaseDesc": "Clique para selecionar e enviar um arquivo .db do seu dispositivo para restaurar seu banco de dados a partir de um backup.",
+      "importDatabaseDesc": "Clique para selecionar e enviar um backup .db ou um dump de migração (.dump) do seu dispositivo para restaurar seu banco de dados.",
       "importDatabaseSuccess": "O banco de dados foi importado com sucesso",
       "importDatabaseError": "Ocorreu um erro ao importar o banco de dados",
       "readDatabaseError": "Ocorreu um erro ao ler o banco de dados",
       "getDatabaseError": "Ocorreu um erro ao recuperar o banco de dados",
       "getConfigError": "Ocorreu um erro ao recuperar o arquivo de configuração",
-      "backupPostgresNote": "Este painel é executado em PostgreSQL. «Backup» baixa um arquivo pg_dump (.dump) e «Restaurar» o recarrega com pg_restore. O servidor precisa ter as ferramentas cliente do PostgreSQL (pg_dump e pg_restore) instaladas.",
+      "backupPostgresNote": "Este painel é executado em PostgreSQL. «Backup» baixa um arquivo pg_dump (.dump) e «Restaurar» o recarrega com pg_restore. «Restaurar» também aceita um banco de dados SQLite (.db) ou um dump de migração do SQLite e importa seus dados para o PostgreSQL. O servidor precisa ter as ferramentas cliente do PostgreSQL (pg_dump e pg_restore) instaladas.",
       "exportDatabasePgDesc": "Clique para baixar um dump do PostgreSQL (.dump) do seu banco de dados atual para o seu dispositivo.",
-      "importDatabasePgDesc": "Clique para selecionar e enviar um arquivo .dump para restaurar seu banco de dados PostgreSQL. Isso substitui todos os dados atuais.",
+      "importDatabasePgDesc": "Clique para selecionar e enviar um backup do PostgreSQL (.dump), um banco de dados SQLite (.db) ou um dump de migração do SQLite para restaurar seu banco de dados. Isso substitui todos os dados atuais.",
       "migrationDownload": "Baixar migração",
-      "migrationDownloadDesc": "Clique para baixar uma exportação portátil .dump (texto SQL) do seu banco de dados SQLite.",
       "migrationDownloadPgDesc": "Clique para baixar um banco de dados SQLite .db criado a partir dos seus dados do PostgreSQL, pronto para executar este painel no SQLite."
     },
     "inbounds": {
@@ -775,7 +774,7 @@
       "renew": "Renovação automática",
       "renewDesc": "Renovação automática após a expiração. (0 = desativar) (unidade: dia)",
       "renewDays": "Renovação automática (dias)",
-      "searchPlaceholder": "Buscar email, comentário, sub ID, UUID, senha, auth…",
+      "searchPlaceholder": "Buscar email, comentário, sub ID, UUID, senha, auth, Telegram ID…",
       "filterTitle": "Filtrar clientes",
       "clearAllFilters": "Limpar tudo",
       "filters": {
@@ -1622,6 +1621,8 @@
         "tag": "Tag",
         "tagDesc": "Tag Única",
         "address": "Endereço",
+        "egress": "Egress",
+        "egressHint": "Run an HTTP test to show egress IP and country.",
         "reverse": "Reverso",
         "domain": "Domínio",
         "type": "Tipo",
@@ -1755,6 +1756,7 @@
         "tagPlaceholder": "tag única do balanceador",
         "selector": "Seletor",
         "fallback": "Fallback",
+        "cycleTooltip": "Ciclo: {path} → (voltar para {start})",
         "expected": "Esperado",
         "expectedPlaceholder": "número ótimo de nós",
         "maxRtt": "Máx. RTT",
@@ -1764,7 +1766,12 @@
         "balancerDesc": "Não é possível usar balancerTag e outboundTag ao mesmo tempo. Se usados simultaneamente, apenas outboundTag funcionará.",
         "costMatch": "Padrão de tag",
         "costValue": "Peso",
-        "costRegexp": "Correspondência por expressão regular"
+        "costRegexp": "Correspondência por expressão regular",
+        "balancerDeleteInUse": "Não é possível excluir este balanceador — ele é usado como fallback para: {names}",
+        "balancerFallbackCycle": "Não é possível definir este balanceador como fallback — isso criaria uma dependência circular.",
+        "balancerFallbackInfo": "O tráfego será roteado através de: Balanceador → Loopback → Servidor → Balanceador de destino → Conexão de saída. Isso adiciona um salto extra pelo servidor, o que pode introduzir pequenos atrasos.",
+        "fallbackBalancerHint": "Selecione outro balanceador como fallback",
+        "reservedPrefix": "O prefixo _bl_ é reservado para objetos loopback internos do balanceador"
       },
       "wireguard": {
         "secretKey": "Chave Secreta",
@@ -1858,14 +1865,17 @@
         "dnsPresetFamily": "Familiar",
         "clearAll": "Remover Todos",
         "clearAllTitle": "Remover todos os servidores DNS?",
-        "clearAllConfirm": "Isso remove todos os servidores DNS da lista. Não pode ser desfeito."
+        "clearAllConfirm": "Isso remove todos os servidores DNS da lista. Não pode ser desfeito.",
+        "dnsLeakWarning": "DNS pode vazar por localhost, UDP/TCP sem criptografia, DoH/DoQ em modo local, consultas de fallback ou EDNS client IP. Use DoH roteado, fixe resolvedores em hosts e desative fallback quando privacidade importar."
       },
       "fakedns": {
         "add": "Adicionar Fake DNS",
         "edit": "Editar Fake DNS",
         "ipPool": "Sub-rede do Pool de IP",
         "poolSize": "Tamanho do Pool"
-      }
+      },
+      "defaultOutbound": "Saída padrão",
+      "defaultOutboundDesc": "Tráfego sem regra de roteamento usa esta saída (a primeira da lista)."
     },
     "hosts": {
       "addHost": "Adicionar Host",
@@ -1894,7 +1904,7 @@
       "fields": {
         "remark": "Observação",
         "serverDescription": "Descrição",
-        "inbound": "Entrada",
+        "inbound": "Entradas",
         "address": "Endereço",
         "port": "Porta",
         "endpoint": "Endpoint",
@@ -1921,7 +1931,8 @@
         "shuffleHost": "Embaralhar host",
         "tags": "Tags",
         "nodeGuids": "Nós",
-        "excludeFromSubTypes": "Excluir dos formatos"
+        "excludeFromSubTypes": "Excluir dos formatos",
+        "inheritAddress": "Herda endereço"
       },
       "hints": {
         "address": "Deixe em branco para herdar o próprio endereço da entrada.",

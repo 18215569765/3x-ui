@@ -261,19 +261,18 @@
       "backup": "نسخ احتياطي",
       "backupTitle": "نسخ احتياطي واستعادة",
       "exportDatabase": "اخزن نسخة",
-      "exportDatabaseDesc": "اضغط عشان تحمل ملف .db يحتوي على نسخة احتياطية لقاعدة البيانات الحالية على جهازك.",
+      "exportDatabaseDesc": "اضغط عشان تحمل ملف .db يحتوي على نسخة احتياطية لقاعدة البيانات الحالية على جهازك. نفس الملف ممكن كمان يترجع على لوحة شغالة بـ PostgreSQL.",
       "importDatabase": "استرجاع",
-      "importDatabaseDesc": "اضغط عشان تختار وتحمل ملف .db من جهازك لاسترجاع قاعدة البيانات من نسخة احتياطية.",
+      "importDatabaseDesc": "اضغط عشان تختار وتحمل نسخة احتياطية .db أو ملف ترحيل (.dump) من جهازك لاسترجاع قاعدة البيانات.",
       "importDatabaseSuccess": "تم استيراد قاعدة البيانات بنجاح",
       "importDatabaseError": "حدث خطأ أثناء استيراد قاعدة البيانات",
       "readDatabaseError": "حدث خطأ أثناء قراءة قاعدة البيانات",
       "getDatabaseError": "حدث خطأ أثناء استرجاع قاعدة البيانات",
       "getConfigError": "حدث خطأ أثناء استرجاع ملف الإعدادات",
-      "backupPostgresNote": "تعمل هذه اللوحة على PostgreSQL. يقوم «النسخ الاحتياطي» بتنزيل أرشيف pg_dump (.dump)، و«الاستعادة» تعيد تحميله عبر pg_restore. يجب أن تكون أدوات عميل PostgreSQL (pg_dump و pg_restore) مثبَّتة على الخادم.",
+      "backupPostgresNote": "تعمل هذه اللوحة على PostgreSQL. يقوم «النسخ الاحتياطي» بتنزيل أرشيف pg_dump (.dump)، و«الاستعادة» تعيد تحميله عبر pg_restore. تقبل «الاستعادة» أيضًا قاعدة بيانات SQLite (.db) أو ملف ترحيل SQLite وتستورد بياناتها إلى PostgreSQL. يجب أن تكون أدوات عميل PostgreSQL (pg_dump و pg_restore) مثبَّتة على الخادم.",
       "exportDatabasePgDesc": "انقر لتنزيل نسخة PostgreSQL (.dump) من قاعدة بياناتك الحالية إلى جهازك.",
-      "importDatabasePgDesc": "انقر لاختيار ورفع ملف .dump لاستعادة قاعدة بيانات PostgreSQL. سيؤدي هذا إلى استبدال جميع البيانات الحالية.",
+      "importDatabasePgDesc": "انقر لاختيار ورفع نسخة احتياطية من PostgreSQL (.dump) أو قاعدة بيانات SQLite (.db) أو ملف ترحيل SQLite لاستعادة قاعدة البيانات. سيؤدي هذا إلى استبدال جميع البيانات الحالية.",
       "migrationDownload": "تنزيل ملف الترحيل",
-      "migrationDownloadDesc": "انقر لتنزيل تصدير .dump محمول (نص SQL) لقاعدة بيانات SQLite الخاصة بك.",
       "migrationDownloadPgDesc": "انقر لتنزيل قاعدة بيانات SQLite بامتداد .db مبنية من بيانات PostgreSQL الخاصة بك، جاهزة لتشغيل هذه اللوحة على SQLite."
     },
     "inbounds": {
@@ -775,7 +774,7 @@
       "renew": "تجديد تلقائي",
       "renewDesc": "تجديد تلقائي بعد انتهاء الصلاحية. (0 = تعطيل) (الوحدة: يوم)",
       "renewDays": "تجديد تلقائي (أيام)",
-      "searchPlaceholder": "ابحث بالبريد، التعليق، sub ID، UUID، كلمة المرور، auth…",
+      "searchPlaceholder": "ابحث بالبريد، التعليق، sub ID، UUID، كلمة المرور، auth، Telegram ID…",
       "filterTitle": "تصفية العملاء",
       "clearAllFilters": "مسح الكل",
       "filters": {
@@ -1622,6 +1621,8 @@
         "tag": "الوسم",
         "tagDesc": "تاج فريد",
         "address": "العنوان",
+        "egress": "Egress",
+        "egressHint": "Run an HTTP test to show egress IP and country.",
         "reverse": "عكسي",
         "domain": "النطاق",
         "type": "النوع",
@@ -1755,6 +1756,7 @@
         "tagPlaceholder": "وسم موازن فريد",
         "selector": "المحدد",
         "fallback": "Fallback",
+        "cycleTooltip": "حلقة: {path} → (العودة إلى {start})",
         "expected": "المتوقع",
         "expectedPlaceholder": "العدد الأمثل للعقد",
         "maxRtt": "أقصى RTT",
@@ -1764,7 +1766,12 @@
         "balancerDesc": "ماينفعش تستخدم balancerTag و outboundTag مع بعض. لو اتستخدموا مع بعض، outboundTag هو اللي هيشتغل.",
         "costMatch": "نمط الوسم",
         "costValue": "الوزن",
-        "costRegexp": "مطابقة تعبير نمطي"
+        "costRegexp": "مطابقة تعبير نمطي",
+        "balancerDeleteInUse": "لا يمكن حذف هذا الموزان — يتم استخدامه كبديل لـ: {names}",
+        "balancerFallbackCycle": "لا يمكن تعيين هذا الموزان كبديل — سيؤدي ذلك إلى إنشاء تبعية دائرية.",
+        "balancerFallbackInfo": "سيتم توجيه حركة المرور عبر: الموزان → Loopback → الخادم → الموزان المستهدف → الاتصال الخارجي. سيؤدي هذا إلى إضافة قفزة إضافية عبر الخادم، مما قد يسبب تأخيرات طفيفة.",
+        "fallbackBalancerHint": "اختر موزان أحمال آخر كبديل",
+        "reservedPrefix": "البادئة _bl_ محجوزة لكائنات loopback الداخلية للموازنات"
       },
       "wireguard": {
         "secretKey": "المفتاح السري",
@@ -1858,14 +1865,17 @@
         "dnsPresetFamily": "العائلي",
         "clearAll": "حذف الكل",
         "clearAllTitle": "حذف جميع خوادم DNS؟",
-        "clearAllConfirm": "سيؤدي هذا إلى إزالة جميع خوادم DNS من القائمة. لا يمكن التراجع عن هذا الإجراء."
+        "clearAllConfirm": "سيؤدي هذا إلى إزالة جميع خوادم DNS من القائمة. لا يمكن التراجع عن هذا الإجراء.",
+        "dnsLeakWarning": "قد يتسرب DNS عبر localhost أو UDP/TCP غير المشفر أو وضع DoH/DoQ المحلي أو استعلامات الرجوع أو EDNS client IP. استخدم DoH عبر التوجيه، وثبت أسماء المحللات في hosts، وعطل الرجوع عندما تكون الخصوصية مهمة."
       },
       "fakedns": {
         "add": "أضف Fake DNS",
         "edit": "عدل Fake DNS",
         "ipPool": "نطاق IP Pool",
         "poolSize": "حجم المجموعة"
-      }
+      },
+      "defaultOutbound": "الصادر الافتراضي",
+      "defaultOutboundDesc": "الحركة التي لا تطابق أي قاعدة توجيه تستخدم هذا الصادر (الأول في القائمة)."
     },
     "hosts": {
       "addHost": "إضافة مضيف",
@@ -1894,7 +1904,7 @@
       "fields": {
         "remark": "ملاحظة",
         "serverDescription": "الوصف",
-        "inbound": "الوارد",
+        "inbound": "الواردات",
         "address": "العنوان",
         "port": "المنفذ",
         "endpoint": "النهاية",
@@ -1921,7 +1931,8 @@
         "tags": "وسوم",
         "nodeGuids": "النودز",
         "excludeFromSubTypes": "استبعاد من الصيغ",
-        "verifyPeerCertByName": "التحقق من شهادة النظير بالاسم"
+        "verifyPeerCertByName": "التحقق من شهادة النظير بالاسم",
+        "inheritAddress": "يرث العنوان"
       },
       "hints": {
         "address": "اتركه فارغاً ليرث عنوان الوارد نفسه.",
