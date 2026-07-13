@@ -46,9 +46,102 @@ jobs:
           mkdir -p .github/workflows
           find .github/workflows -maxdepth 1 -type f -delete
           cp "$RUNNER_TEMP/sync-upstream.yml" .github/workflows/sync-upstream.yml
+          rm -f .github/dependabot.yml
 
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "chore: sync upstream"
             git push origin "HEAD:${TARGET_BRANCH}"
           fi
+
+      - name: Sync stable version tags
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch upstream "+refs/tags/v*:refs/tags/v*"
+          git push origin "refs/tags/v*:refs/tags/v*"
+
+      - name: Mirror latest stable release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          upstream_release="$RUNNER_TEMP/upstream-release.json"
+          release_payload="$RUNNER_TEMP/release-payload.json"
+          existing_assets="$RUNNER_TEMP/existing-assets.json"
+          assets_dir="$RUNNER_TEMP/release-assets"
+
+          mkdir -p "$assets_dir"
+          gh api "repos/${UPSTREAM_REPO}/releases/latest" > "$upstream_release"
+
+          tag_name="$(jq -r '.tag_name' "$upstream_release")"
+          if [[ ! "$tag_name" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Latest upstream release is not a stable semantic version: $tag_name"
+            exit 1
+          fi
+
+          jq '{tag_name, name, body, draft, prerelease, make_latest: "true"}' \
+            "$upstream_release" > "$release_payload"
+
+          release_id="$(
+            gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag_name}" \
+              --jq '.id' 2>/dev/null || true
+          )"
+
+          if [[ -z "$release_id" ]]; then
+            release_id="$(
+              gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
+                --input "$release_payload" --jq '.id'
+            )"
+          else
+            gh api --method PATCH \
+              "repos/${GITHUB_REPOSITORY}/releases/${release_id}" \
+              --input "$release_payload" >/dev/null
+          fi
+
+          gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?per_page=100" \
+            > "$existing_assets"
+
+          jq -r '.assets[] | [.name, (.size | tostring), .browser_download_url, .content_type] | @tsv' \
+            "$upstream_release" |
+          while IFS=$'\t' read -r asset_name expected_size download_url content_type; do
+            existing_id="$(
+              jq -r --arg name "$asset_name" \
+                '.[] | select(.name == $name) | .id' "$existing_assets"
+            )"
+            existing_size="$(
+              jq -r --arg name "$asset_name" \
+                '.[] | select(.name == $name) | .size' "$existing_assets"
+            )"
+
+            if [[ -n "$existing_id" && "$existing_size" == "$expected_size" ]]; then
+              echo "Asset already matches: $asset_name"
+              continue
+            fi
+
+            if [[ -n "$existing_id" ]]; then
+              gh api --method DELETE \
+                "repos/${GITHUB_REPOSITORY}/releases/assets/${existing_id}"
+            fi
+
+            asset_path="$assets_dir/$asset_name"
+            curl --fail --location --retry 3 --retry-delay 2 \
+              --output "$asset_path" "$download_url"
+
+            actual_size="$(stat --format='%s' "$asset_path")"
+            if [[ "$actual_size" != "$expected_size" ]]; then
+              echo "Asset size mismatch for $asset_name: expected $expected_size, got $actual_size"
+              exit 1
+            fi
+
+            encoded_name="$(jq -rn --arg value "$asset_name" '$value | @uri')"
+            gh api --hostname uploads.github.com --method POST \
+              -H "Content-Type: $content_type" \
+              "repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?name=${encoded_name}" \
+              --input "$asset_path" >/dev/null
+
+            rm -f "$asset_path"
+          done
