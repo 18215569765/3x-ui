@@ -1868,6 +1868,13 @@
             ],
             "type": "string"
           },
+          "trafficResetDay": {
+            "description": "Day of month for monthly traffic resets",
+            "example": 1,
+            "maximum": 31,
+            "minimum": 1,
+            "type": "integer"
+          },
           "up": {
             "description": "Upload traffic in bytes",
             "format": "int64",
@@ -1894,6 +1901,7 @@
           "tag",
           "total",
           "trafficReset",
+          "trafficResetDay",
           "up"
         ],
         "type": "object"
@@ -3159,6 +3167,7 @@
                       "tag": "in-443-tcp",
                       "total": 0,
                       "trafficReset": "never",
+                      "trafficResetDay": 1,
                       "up": 0
                     }
                   ]
@@ -3964,6 +3973,36 @@
                 "example": {
                   "success": true,
                   "msg": "Inbound updated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/openapi.json": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Serve this API description as an OpenAPI 3 document — the same file that powers the API Docs page. Requires a session or Bearer token like the rest of /panel/api. Useful for generating clients or importing into API tooling.",
+        "operationId": "get_panel_api_openapi_json",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
                 }
               }
             }
@@ -5798,6 +5837,47 @@
             "description": "Client email (unique identifier).",
             "schema": {
               "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/get/tgId/{tgId}": {
+      "get": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Fetch clients by Telegram user ID. Returns an array since multiple clients can share the same Telegram ID.",
+        "operationId": "get_panel_api_clients_get_tgId_tgId",
+        "parameters": [
+          {
+            "name": "tgId",
+            "in": "path",
+            "required": true,
+            "description": "Telegram user ID (numeric).",
+            "schema": {
+              "type": "integer"
             }
           }
         ],
@@ -9666,6 +9746,36 @@
         ],
         "summary": "Return the computed default settings based on the request host. Useful to preview what a fresh install would use.",
         "operationId": "post_panel_api_setting_defaultSettings",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/factoryDefaults": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Return the shipped (factory) default value per browser-safe setting key, so clients can tell a stored value apart from the default it would fall back to. Per-install material (secret, panelGuid, mTLS keys) and credential fields are never included.",
+        "operationId": "post_panel_api_setting_factoryDefaults",
         "responses": {
           "200": {
             "description": "Successful response",
